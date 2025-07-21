@@ -24,10 +24,10 @@ export const MessageInput = ({
 }: Props) => {
   const templateMessages = [
     "what's up",
-    "tell me a joke", 
-    "who are you?",
-    "go wild",
-    "plan the future"
+    "go deep", 
+    "what are you?",
+    "surprise me",
+    "inspire me"
   ];
 
   const handleTemplateClick = (template: string) => {
@@ -70,25 +70,25 @@ export const MessageInput = ({
               key={index}
               onClick={() => handleTemplateClick(template)}
               style={{
-                backgroundColor: '#2A2A2A',
-                border: '1px solid #444',
+                backgroundColor: '#F7F7F8',
+                border: '1px solid #E5E5E5',
                 borderRadius: '20px',
                 padding: '8px 16px',
-                color: '#CCCCCC',
+                color: '#374151',
                 fontSize: '14px',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 whiteSpace: 'nowrap',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#3A3A3A';
-                e.currentTarget.style.borderColor = '#555';
-                e.currentTarget.style.color = '#FFFFFF';
+                e.currentTarget.style.backgroundColor = '#ECECF1';
+                e.currentTarget.style.borderColor = '#D1D5DB';
+                e.currentTarget.style.color = '#111827';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#2A2A2A';
-                e.currentTarget.style.borderColor = '#444';
-                e.currentTarget.style.color = '#CCCCCC';
+                e.currentTarget.style.backgroundColor = '#F7F7F8';
+                e.currentTarget.style.borderColor = '#E5E5E5';
+                e.currentTarget.style.color = '#374151';
               }}
             >
               {template}
@@ -105,17 +105,18 @@ export const MessageInput = ({
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
-          backgroundColor: '#1A1A1A',
+          backgroundColor: '#FFFFFF',
           borderRadius: '16px',
           padding: '8px 12px',
-          border: '1px solid #333',
+          border: '1px solid #E5E5E5',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
         }}
       >
         <button
           disabled={isChatProcessing}
           onClick={onClickMicButton}
           style={{
-            backgroundColor: isMicRecording ? '#1DA1F2' : 'transparent',
+            backgroundColor: isMicRecording ? '#10A37F' : 'transparent',
             border: 'none',
             borderRadius: '8px',
             padding: '8px',
@@ -129,18 +130,18 @@ export const MessageInput = ({
           }}
           onMouseEnter={(e) => {
             if (!isChatProcessing) {
-              e.currentTarget.style.backgroundColor = isMicRecording ? '#1DA1F2' : '#2A2A2A';
+              e.currentTarget.style.backgroundColor = isMicRecording ? '#0D8A68' : '#F7F7F8';
             }
           }}
           onMouseLeave={(e) => {
             if (!isChatProcessing) {
-              e.currentTarget.style.backgroundColor = isMicRecording ? '#1DA1F2' : 'transparent';
+              e.currentTarget.style.backgroundColor = isMicRecording ? '#10A37F' : 'transparent';
             }
           }}
         >
           {(HiMicrophone as any)({ 
             size: 20, 
-            color: isMicRecording ? '#FFFFFF' : '#999999' 
+            color: isMicRecording ? '#FFFFFF' : '#6B7280' 
           })}
         </button>
 
@@ -155,7 +156,7 @@ export const MessageInput = ({
             flex: 1,
             backgroundColor: 'transparent',
             border: 'none',
-            color: '#FFFFFF',
+            color: '#111827',
             fontSize: '16px',
             outline: 'none',
             padding: '8px 0',
@@ -167,8 +168,8 @@ export const MessageInput = ({
             style={{
               width: '20px',
               height: '20px',
-              border: '2px solid #333',
-              borderTop: '2px solid #1DA1F2',
+              border: '2px solid #E5E5E5',
+              borderTop: '2px solid #10A37F',
               borderRadius: '50%',
               animation: 'spin 1s linear infinite',
             }}
@@ -178,7 +179,7 @@ export const MessageInput = ({
             disabled={!userMessage}
             onClick={onClickSendButton}
             style={{
-              backgroundColor: userMessage ? '#1DA1F2' : '#333',
+              backgroundColor: userMessage ? '#10A37F' : '#E5E5E5',
               border: 'none',
               borderRadius: '8px',
               padding: '8px 12px',
@@ -192,18 +193,18 @@ export const MessageInput = ({
             }}
             onMouseEnter={(e) => {
               if (userMessage) {
-                e.currentTarget.style.backgroundColor = '#0D8BD9';
+                e.currentTarget.style.backgroundColor = '#0D8A68';
               }
             }}
             onMouseLeave={(e) => {
               if (userMessage) {
-                e.currentTarget.style.backgroundColor = '#1DA1F2';
+                e.currentTarget.style.backgroundColor = '#10A37F';
               }
             }}
           >
             {(HiPaperAirplane as any)({ 
               size: 20, 
-              color: userMessage ? '#FFFFFF' : '#999999' 
+              color: userMessage ? '#FFFFFF' : '#9CA3AF' 
             })}
           </button>
         )}

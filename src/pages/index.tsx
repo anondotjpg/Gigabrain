@@ -333,7 +333,7 @@ export default function Home() {
             padding: '0',
             backgroundColor: selectedVrm === 1 ? '#1D9BF0' : '#666',
             border: selectedVrm === 1 ? '3px solid #1D9BF0' : '3px solid #666',
-            borderRadius: '8px',
+            borderRadius: '50%',
             cursor: 'pointer',
             width: '50px',
             height: '50px',
@@ -350,7 +350,7 @@ export default function Home() {
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              borderRadius: '4px'
+              borderRadius: '50%'
             }}
           />
         </button>
@@ -360,7 +360,7 @@ export default function Home() {
             padding: '0',
             backgroundColor: selectedVrm === 2 ? '#1D9BF0' : '#666',
             border: selectedVrm === 2 ? '3px solid #1D9BF0' : '3px solid #666',
-            borderRadius: '8px',
+            borderRadius: '50%',
             cursor: 'pointer',
             width: '50px',
             height: '50px',
@@ -377,7 +377,7 @@ export default function Home() {
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              borderRadius: '4px'
+              borderRadius: '50%'
             }}
           />
         </button>
@@ -387,7 +387,7 @@ export default function Home() {
             padding: '0',
             backgroundColor: selectedVrm === 3 ? '#1D9BF0' : '#666',
             border: selectedVrm === 3 ? '3px solid #1D9BF0' : '3px solid #666',
-            borderRadius: '8px',
+            borderRadius: '50%',
             cursor: 'pointer',
             width: '50px',
             height: '50px',
@@ -404,7 +404,7 @@ export default function Home() {
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              borderRadius: '4px'
+              borderRadius: '50%'
             }}
           />
         </button>
@@ -414,7 +414,7 @@ export default function Home() {
             padding: '0',
             backgroundColor: selectedVrm === 4 ? '#1D9BF0' : '#666',
             border: selectedVrm === 4 ? '3px solid #1D9BF0' : '3px solid #666',
-            borderRadius: '8px',
+            borderRadius: '50%',
             cursor: 'pointer',
             width: '50px',
             height: '50px',
@@ -431,7 +431,7 @@ export default function Home() {
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              borderRadius: '4px'
+              borderRadius: '50%'
             }}
           />
         </button>
@@ -444,7 +444,7 @@ export default function Home() {
               padding: '0',
               backgroundColor: '#333',
               border: '3px solid #333',
-              borderRadius: '8px',
+              borderRadius: '50%',
               cursor: 'not-allowed',
               width: '50px',
               height: '50px',
@@ -473,7 +473,7 @@ export default function Home() {
           {/* Soon Tag */}
           <div style={{
             position: 'absolute',
-            top: '-5px',
+            top: '-2px',
             right: '-5px',
             backgroundColor: '#364153',
             color: 'white',
@@ -490,7 +490,7 @@ export default function Home() {
       </div>
 
       <VrmViewer selectedVrm={selectedVrm} />
-      <CopyToClipboard textToCopy="CUKPbiaY7akv5efzsup8dNC8XjBoRJjtuTksGae5bonk" />
+      <CopyToClipboard textToCopy="XXXXXXXXXXXXXXXXXXXXXXX" />
       <div className="">
         <MessageInputContainer
           isChatProcessing={chatProcessing}

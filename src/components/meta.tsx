@@ -2,9 +2,9 @@ import { buildUrl } from "@/utils/buildUrl";
 import Head from "next/head";
 
 export const Meta = () => {
-  const title = "COMPAI | spawn in your frens";
+  const title = "frens | digital companions";
   const description =
-    "spawn in your internet frens";
+    "interact with your internet frens";
   const imageUrl = "/d.png";
   const faviconUrl = "/d.ico";  // Replace with your favicon path if different
 

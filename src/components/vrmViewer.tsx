@@ -9,7 +9,7 @@ const GlobalStyles = createGlobalStyle`
   body {
     margin: 0;
     padding: 0;
-    background-color: #0F0F0F;
+    background-color: #FFFFFF;
   }
 `;
 
@@ -94,7 +94,7 @@ export default function VrmViewer({ selectedVrm }: VrmViewerProps) {
   return (
     <div>
       <GlobalStyles />
-      <div className="bg-[#0F0F0F]" style={{ position: "absolute", bottom: 0, left: 0, width: "100%", height: "100vh", zIndex: -10 }}>
+      <div className="bg-[#FFFFFF]" style={{ position: "absolute", bottom: 0, left: 0, width: "100%", height: "100vh", zIndex: -10 }}>
         {/* 3D Canvas */}
         <canvas ref={canvasRef} style={{ width: "100%", height: "100%" }}></canvas>
         
@@ -106,7 +106,7 @@ export default function VrmViewer({ selectedVrm }: VrmViewerProps) {
             left: 0,
             width: "100%",
             height: "100%",
-            backgroundColor: "rgba(15, 15, 15, 0.8)",
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

@@ -56,7 +56,7 @@ export const CopyToClipboard = ({ textToCopy }: Props) => {
         
         {/* Copy button */}
         <motion.button
-          className="flex items-center justify-center p-4 rounded-md focus:outline-none bg-gray-800 text-[#CCCCCC] text-[10px]"
+          className="flex items-center justify-center p-4 rounded-md focus:outline-none bg-gray-800 text-[#414141] text-[10px]"
           onClick={handleCopy}
           whileTap={{ scale: 0.95 }}
         >
