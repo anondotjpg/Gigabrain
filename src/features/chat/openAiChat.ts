@@ -52,7 +52,7 @@ export async function getChatResponseStream(
         const YOUR_SITE_NAME = 'ChatVRM';
 
         let isStreamed = false;
-        const generation = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        const generation = await fetch("https://openrouter.ai/api/v1", {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
@@ -65,7 +65,7 @@ export async function getChatResponseStream(
             // "model": "openai/gpt-3.5-turbo",
             // "model": "cohere/command-r-plus",
             // "model": "anthropic/claude-3.5-sonnet:beta",
-            "model": "openai/gpt-4.1-mini",
+            "model": "x-ai/grok-4",
             "messages": messages, // Now using the messages array directly
             "temperature": 0.7,
             "max_tokens": 200,
