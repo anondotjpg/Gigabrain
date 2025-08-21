@@ -52,7 +52,7 @@ export async function getChatResponseStream(
         const YOUR_SITE_NAME = 'ChatVRM';
 
         let isStreamed = false;
-        const generation = await fetch("https://openrouter.ai/api/v1", {
+        const generation = await fetch("https://openrouter.ai/api/v1/chat/completions", {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
