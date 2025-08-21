@@ -4,8 +4,8 @@ import axios, { AxiosRequestConfig, ResponseType } from "axios";
 
 // Define voice IDs for each VRM
 const VOICE_IDS = {
-  1: "XJ2fW4ybq7HouelYYGcL", // Current voice ID for VRM 1
-  2: "2bk7ULW9HfwvcIbMWod0",    // Replace with actual voice ID for VRM 2
+  1: "6OzrBCQf8cjERkYgzSg8", // Current voice ID for VRM 1
+  2: "6OzrBCQf8cjERkYgzSg8",    // Replace with actual voice ID for VRM 2
   3: "6OzrBCQf8cjERkYgzSg8",    // Replace with actual voice ID for VRM 3
   4: "6OzrBCQf8cjERkYgzSg8",
 };
