@@ -48,16 +48,22 @@ export default function Home() {
   const [backgroundImage, setBackgroundImage] = useState<string>('');
   const [restreamTokens, setRestreamTokens] = useState<any>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
-  // needed because AI speaking could involve multiple audios being played in sequence
   const [isAISpeaking, setIsAISpeaking] = useState(false);
-  const [selectedVrm, setSelectedVrm] = useState<number>(1); // New state for VRM selection
+  const [selectedVrm, setSelectedVrm] = useState<number>(1);
   const [openRouterKey, setOpenRouterKey] = useState<string>(() => {
-    // Try to load from localStorage on initial render
     if (typeof window !== 'undefined') {
       return localStorage.getItem('openRouterKey') || '';
     }
     return '';
   });
+
+  // Debug: Log key states
+  useEffect(() => {
+    console.log('🔑 API Keys Status:');
+    console.log('  OpenAI Key:', openAiKey ? `Set (${openAiKey.substring(0, 10)}...)` : 'Not set');
+    console.log('  OpenRouter Key:', openRouterKey ? `Set (${openRouterKey.substring(0, 10)}...)` : 'Not set');
+    console.log('  ElevenLabs Key:', elevenLabsKey ? `Set (${elevenLabsKey.substring(0, 10)}...)` : 'Not set');
+  }, [openAiKey, openRouterKey, elevenLabsKey]);
 
   useEffect(() => {
     if (window.localStorage.getItem("chatVRMParams")) {
@@ -69,11 +75,9 @@ export default function Home() {
       setChatLog(params.chatLog);
     }
     
-    // Get API keys from environment variables
     setOpenAiKey(process.env.NEXT_PUBLIC_OPENAI_API_KEY as string || "");
     setElevenLabsKey(process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY as string || "");
     
-    // load openrouter key from localStorage
     const savedOpenRouterKey = localStorage.getItem('openRouterKey');
     if (savedOpenRouterKey) {
       setOpenRouterKey(savedOpenRouterKey);
@@ -82,7 +86,6 @@ export default function Home() {
     if (savedBackground) {
       setBackgroundImage(savedBackground);
     }
-    // Load saved VRM selection
     const savedVrm = localStorage.getItem('selectedVrm');
     if (savedVrm) {
       setSelectedVrm(parseInt(savedVrm));
@@ -94,12 +97,9 @@ export default function Home() {
       window.localStorage.setItem(
         "chatVRMParams",
         JSON.stringify({ systemPrompt, elevenLabsParam, chatLog })
-      )
-
-      // Save VRM selection
+      );
       window.localStorage.setItem("selectedVrm", selectedVrm.toString());
-    }
-    );
+    });
   }, [systemPrompt, elevenLabsParam, chatLog, selectedVrm]);
 
   const handleChangeChatLog = useCallback(
@@ -107,15 +107,11 @@ export default function Home() {
       const newChatLog = chatLog.map((v: Message, i) => {
         return i === targetIndex ? { role: v.role, content: text } : v;
       });
-
       setChatLog(newChatLog);
     },
     [chatLog]
   );
 
-  /**
-   * 文ごとに音声を直接でリクエストしながら再生する
-   */
   const handleSpeakAi = useCallback(
     async (
       screenplay: Screenplay,
@@ -125,29 +121,30 @@ export default function Home() {
       onStart?: () => void,
       onEnd?: () => void
     ) => {
-      setIsAISpeaking(true);  // Set speaking state before starting
+      console.log('🗣️ Starting AI speech...');
+      setIsAISpeaking(true);
       try {
         await speakCharacter(
           screenplay, 
           elevenLabsKey, 
           elevenLabsParam, 
-          selectedVrm, // Pass the selected VRM
+          selectedVrm,
           viewer, 
           () => {
             setIsPlayingAudio(true);
-            console.log('audio playback started');
+            console.log('🔊 Audio playback started');
             onStart?.();
           }, 
           () => {
             setIsPlayingAudio(false);
-            console.log('audio playback completed');
+            console.log('✅ Audio playback completed');
             onEnd?.();
           }
         );
       } catch (error) {
-        console.error('Error during AI speech:', error);
+        console.error('❌ Error during AI speech:', error);
       } finally {
-        setIsAISpeaking(false);  // Ensure speaking state is reset even if there's an error
+        setIsAISpeaking(false);
       }
     },
     [viewer]
@@ -158,16 +155,24 @@ export default function Home() {
    */
   const handleSendChat = useCallback(
     async (text: string) => {
+      console.log('💬 handleSendChat called with text:', text);
+      
       const newMessage = text;
-      if (newMessage == null) return;
+      if (newMessage == null) {
+        console.log('❌ No message provided');
+        return;
+      }
 
+      console.log('⏳ Setting chat processing to true...');
       setChatProcessing(true);
+      
       // Add user's message to chat log
       const messageLog: Message[] = [
         ...chatLog,
         { role: "user", content: newMessage },
       ];
       setChatLog(messageLog);
+      console.log('📝 Updated chat log:', messageLog);
 
       // Process messages through MessageMiddleOut
       const messageProcessor = new MessageMiddleOut();
@@ -178,102 +183,116 @@ export default function Home() {
         },
         ...messageLog,
       ]);
+      console.log('🔄 Processed messages:', processedMessages);
 
       let localOpenRouterKey = openRouterKey;
       if (!localOpenRouterKey) {
-        // fallback to free key for users to try things out
+        console.log('🔑 Using fallback OpenRouter key from env');
         localOpenRouterKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY!;
       }
+      
+      console.log('🌐 Making API request with key:', localOpenRouterKey ? `${localOpenRouterKey.substring(0, 10)}...` : 'No key');
 
-      const stream = await getChatResponseStream(processedMessages, openAiKey, localOpenRouterKey).catch(
-        (e) => {
-          console.error(e);
-          return null;
-        }
-      );
-      if (stream == null) {
-        setChatProcessing(false);
-        return;
-      }
-
-      const reader = stream.getReader();
-      let receivedMessage = "";
-      let aiTextLog = "";
-      let tag = "";
-      const sentences = new Array<string>();
       try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+        const stream = await getChatResponseStream(processedMessages, openAiKey, localOpenRouterKey);
+        
+        if (stream == null) {
+          console.error('❌ Failed to get stream - stream is null');
+          setChatProcessing(false);
+          return;
+        }
 
-          receivedMessage += value;
-
-          // console.log('receivedMessage');
-          // console.log(receivedMessage);
-
-          // 返答内容のタグ部分の検出
-          const tagMatch = receivedMessage.match(/^\[(.*?)\]/);
-          if (tagMatch && tagMatch[0]) {
-            tag = tagMatch[0];
-            receivedMessage = receivedMessage.slice(tag.length);
-
-            console.log('tag:');
-            console.log(tag);
-          }
-
-          // 返答を一単位で切り出して処理する
-          const sentenceMatch = receivedMessage.match(
-            /^(.+[。．！？\n.!?]|.{10,}[、,])/
-          );
-          if (sentenceMatch && sentenceMatch[0]) {
-            const sentence = sentenceMatch[0];
-            sentences.push(sentence);
-
-            console.log('sentence:');
-            console.log(sentence);
-
-            receivedMessage = receivedMessage
-              .slice(sentence.length)
-              .trimStart();
-
-            // 発話不要/不可能な文字列だった場合はスキップ
-            if (
-              !sentence.replace(
-                /^[\s\[\(\{「［（【『〈《〔｛«‹〘〚〛〙›»〕》〉』】）］」\}\)\]]+$/g,
-                ""
-              )
-            ) {
-              continue;
+        console.log('✅ Stream obtained successfully');
+        const reader = stream.getReader();
+        let receivedMessage = "";
+        let aiTextLog = "";
+        let tag = "";
+        const sentences = new Array<string>();
+        
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              console.log('📡 Stream reading completed');
+              break;
             }
 
-            const aiText = `${tag} ${sentence}`;
-            const aiTalks = textsToScreenplay([aiText], koeiroParam);
-            aiTextLog += aiText;
+            receivedMessage += value;
+            console.log('📥 Received chunk:', value);
+            console.log('📄 Full received message so far:', receivedMessage);
 
-            // 文ごとに音声を生成 & 再生、返答を表示
-            const currentAssistantMessage = sentences.join(" ");
-            handleSpeakAi(aiTalks[0], elevenLabsKey, elevenLabsParam, selectedVrm, () => {
-              setAssistantMessage(currentAssistantMessage);
-            });
+            // 返答内容のタグ部分の検出
+            const tagMatch = receivedMessage.match(/^\[(.*?)\]/);
+            if (tagMatch && tagMatch[0]) {
+              tag = tagMatch[0];
+              receivedMessage = receivedMessage.slice(tag.length);
+              console.log('🏷️ Detected tag:', tag);
+            }
+
+            // 返答を一単位で切り出して処理する
+            const sentenceMatch = receivedMessage.match(
+              /^(.+[。.!?\n.!?]|.{10,}[、,])/
+            );
+            if (sentenceMatch && sentenceMatch[0]) {
+              const sentence = sentenceMatch[0];
+              sentences.push(sentence);
+
+              console.log('📝 Processing sentence:', sentence);
+
+              receivedMessage = receivedMessage
+                .slice(sentence.length)
+                .trimStart();
+
+              // 発話不要/不可能な文字列だった場合はスキップ
+              if (
+                !sentence.replace(
+                  /^[\s\[\(\{「[(【『〈《〔{«‹〘〚〛〙›»〕》〉』】)]」\}\)\]]+$/g,
+                  ""
+                )
+              ) {
+                console.log('⏭️ Skipping empty/invalid sentence');
+                continue;
+              }
+
+              const aiText = `${tag} ${sentence}`;
+              const aiTalks = textsToScreenplay([aiText], koeiroParam);
+              aiTextLog += aiText;
+
+              console.log('🎭 Generated screenplay:', aiTalks[0]);
+
+              // 文ごとに音声を生成 & 再生、返答を表示
+              const currentAssistantMessage = sentences.join(" ");
+              handleSpeakAi(aiTalks[0], elevenLabsKey, elevenLabsParam, selectedVrm, () => {
+                setAssistantMessage(currentAssistantMessage);
+                console.log('💭 Updated assistant message:', currentAssistantMessage);
+              });
+            }
           }
+        } catch (e) {
+          console.error('❌ Error during stream processing:', e);
+          setChatProcessing(false);
+        } finally {
+          reader.releaseLock();
+          console.log('🔓 Stream reader released');
         }
-      } catch (e) {
+
+        // アシスタントの返答をログに追加
+        const messageLogAssistant: Message[] = [
+          ...messageLog,
+          { role: "assistant", content: aiTextLog },
+        ];
+
+        console.log('📋 Final assistant message log:', messageLogAssistant);
+        setChatLog(messageLogAssistant);
         setChatProcessing(false);
-        console.error(e);
-      } finally {
-        reader.releaseLock();
+        console.log('✅ Chat processing completed');
+        
+      } catch (error) {
+        console.error('❌ Error in getChatResponseStream:', error);
+        setChatProcessing(false);
       }
-
-      // アシスタントの返答をログに追加
-      const messageLogAssistant: Message[] = [
-        ...messageLog,
-        { role: "assistant", content: aiTextLog },
-      ];
-
-      setChatLog(messageLogAssistant);
-      setChatProcessing(false);
     },
-    [systemPrompt, chatLog, handleSpeakAi, openAiKey, elevenLabsKey, elevenLabsParam, openRouterKey, selectedVrm]
+    [systemPrompt, chatLog, handleSpeakAi, openAiKey, elevenLabsKey, elevenLabsParam, openRouterKey, selectedVrm, koeiroParam]
   );
 
   const handleTokensUpdate = useCallback((tokens: any) => {
@@ -282,10 +301,12 @@ export default function Home() {
 
   // Set up global websocket handler
   useEffect(() => {
+    console.log('🔌 Setting up websocket LLM callback');
     websocketService.setLLMCallback(async (message: string): Promise<LLMCallbackResult> => {
+      console.log('📨 Websocket message received:', message);
       try {
         if (isAISpeaking || isPlayingAudio || chatProcessing) {
-          console.log('Skipping message processing - system busy');
+          console.log('⏸️ Skipping message processing - system busy');
           return {
             processed: false,
             error: 'System is busy processing previous message'
@@ -297,7 +318,7 @@ export default function Home() {
           processed: true
         };
       } catch (error) {
-        console.error('Error processing message:', error);
+        console.error('❌ Error processing websocket message:', error);
         return {
           processed: false,
           error: error instanceof Error ? error.message : 'Unknown error occurred'
@@ -308,18 +329,19 @@ export default function Home() {
 
   const handleOpenRouterKeyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newKey = event.target.value;
+    console.log('🔑 OpenRouter key updated');
     setOpenRouterKey(newKey);
     localStorage.setItem('openRouterKey', newKey);
   };
 
   const handleVrmChange = (vrmNumber: number) => {
+    console.log('🤖 VRM changed to:', vrmNumber);
     setSelectedVrm(vrmNumber);
   };
 
   return (
     <div className={inter.className}>
       <Meta />
-
       <Computer3DWithVrm selectedVrm={4} />
       <CopyToClipboard textToCopy="1234pump" />
       <div className="">
