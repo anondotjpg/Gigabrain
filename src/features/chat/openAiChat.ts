@@ -47,7 +47,7 @@ export async function getChatResponseStream(
     async start(controller: ReadableStreamDefaultController) {
       try {
 
-        const OPENROUTER_API_KEY = openRouterKey;
+        const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
         const YOUR_SITE_URL = 'https://www.waifu-gamma.vercel.app/';
         const YOUR_SITE_NAME = 'ChatVRM';
 
