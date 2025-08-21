@@ -65,7 +65,7 @@ export async function getChatResponseStream(
             // "model": "openai/gpt-3.5-turbo",
             // "model": "cohere/command-r-plus",
             // "model": "anthropic/claude-3.5-sonnet:beta",
-            "model": "x-ai/grok-4",
+            "model": "openai/gpt-5-mini",
             "messages": messages, // Now using the messages array directly
             "temperature": 0.7,
             "max_tokens": 200,
