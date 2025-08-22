@@ -2,7 +2,9 @@ import React, { useEffect, useRef, useContext, useCallback, useState } from 'rea
 import * as THREE from 'three';
 import { ViewerContext } from "../features/vrmViewer/viewerContext";
 import { buildUrl } from "@/utils/buildUrl";
-import { createGlobalStyle, ThemeProvider } from 'styled-components';
+import { createGlobalStyle } from 'styled-components';
+import { createRoot } from 'react-dom/client';
+import HyperTextDemo from './hyper';
 
 const GlobalStyles = createGlobalStyle`
   body {
@@ -24,10 +26,13 @@ interface Computer3DWithVrmProps {
 const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) => {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const vrmCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const overlayCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const animationRef = useRef<number | null>(null);
   const renderTargetRef = useRef<THREE.WebGLRenderTarget | null>(null);
+  const hyperTextContainerRef = useRef<HTMLDivElement | null>(null);
+  const reactRootRef = useRef<any>(null);
   
   const { viewer } = useContext(ViewerContext);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,7 +60,6 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
   const loadVrm = async (url: string) => {
     setIsLoading(true);
     try {
-      
       await viewer.loadVrm(url);
       setTimeout(() => {
         setIsLoading(false);
@@ -64,6 +68,45 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
       console.error('Error loading VRM:', error);
       setIsLoading(false);
     }
+  };
+
+  // Function to capture HTML element as canvas image
+  const htmlToCanvas = (element: HTMLElement, canvas: HTMLCanvasElement) => {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Use html2canvas-like approach but simplified for our use case
+    const rect = element.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+
+    // Create an SVG with foreign object containing our HTML
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', rect.width.toString());
+    svg.setAttribute('height', rect.height.toString());
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+    const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+    foreignObject.setAttribute('width', '100%');
+    foreignObject.setAttribute('height', '100%');
+    
+    // Clone the element and its styles
+    const clonedElement = element.cloneNode(true) as HTMLElement;
+    foreignObject.appendChild(clonedElement);
+    svg.appendChild(foreignObject);
+
+    // Convert SVG to image
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const img = new Image();
+    
+    return new Promise<void>((resolve) => {
+      img.onload = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        resolve();
+      };
+      img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+    });
   };
 
   const vrmCanvasCallback = useCallback(
@@ -103,6 +146,38 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
     }
   }, [selectedVrm, viewer]);
 
+  // Set up the hidden HyperTextDemo component
+  useEffect(() => {
+    // Create container for HyperTextDemo
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '-9999px';
+    container.style.width = '200px';
+    container.style.height = '100px';
+    container.style.background = 'transparent';
+    container.style.color = '#00ff00';
+    container.style.fontFamily = 'monospace';
+    container.style.fontSize = '14px';
+    document.body.appendChild(container);
+    
+    hyperTextContainerRef.current = container;
+
+    // Render HyperTextDemo into the container
+    const root = createRoot(container);
+    reactRootRef.current = root;
+    root.render(<HyperTextDemo />);
+
+    return () => {
+      if (reactRootRef.current) {
+        reactRootRef.current.unmount();
+      }
+      if (container.parentNode) {
+        container.parentNode.removeChild(container);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     if (!mountRef.current) return;
 
@@ -120,12 +195,18 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
     sceneRef.current = scene;
     rendererRef.current = renderer;
 
-    // Create canvas texture for VRM viewer
-    const vrmCanvas = document.createElement('canvas');
-    vrmCanvas.width = 512;
-    vrmCanvas.height = 384;
-    const canvasTexture = new THREE.CanvasTexture(vrmCanvas);
-    canvasTexture.flipY = false; // Don't flip the texture
+    // Create canvas for compositing VRM and HyperText
+    const compositeCanvas = document.createElement('canvas');
+    compositeCanvas.width = 512;
+    compositeCanvas.height = 384;
+    const canvasTexture = new THREE.CanvasTexture(compositeCanvas);
+    canvasTexture.flipY = false;
+
+    // Create overlay canvas for HyperText
+    const overlayCanvas = document.createElement('canvas');
+    overlayCanvas.width = 512;
+    overlayCanvas.height = 384;
+    overlayCanvasRef.current = overlayCanvas;
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
@@ -150,8 +231,6 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
     const monitorMaterial = new THREE.MeshLambertMaterial({ color: 0x1a1a1a });
     const baseMaterial = new THREE.MeshLambertMaterial({ color: 0x404040 });
     const blackBaseMaterial = new THREE.MeshLambertMaterial({ color: 0x000000 });
-    const keyboardMaterial = new THREE.MeshLambertMaterial({ color: 0x1a1a1a });
-    const mouseMaterial = new THREE.MeshLambertMaterial({ color: 0x1a1a1a });
 
     // Monitor
     const monitorGeometry = new THREE.BoxGeometry(2, 1.5, 0.1);
@@ -160,7 +239,7 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
     monitor.castShadow = true;
     computerGroup.add(monitor);
 
-    // Screen with VRM viewer texture
+    // Screen with composite texture
     const screenGeometry = new THREE.BoxGeometry(1.8, 1.3, 0.05);
     const screenMaterial = new THREE.MeshBasicMaterial({ 
       map: canvasTexture,
@@ -184,10 +263,8 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
     stand.castShadow = true;
     computerGroup.add(stand);
 
-    // Simple Razer Gaming Keyboard - Direct Replacement
+    // Keyboard
     const keyboardGeometry = new THREE.BoxGeometry(1.2, 0.05, 0.4);
-
-    // Main keyboard with Razer black
     const kbMaterial = new THREE.MeshPhongMaterial({ 
       color: 0x0a0a0a,
       shininess: 60
@@ -211,7 +288,6 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
     const keyGeom = new THREE.BoxGeometry(0.04, 0.008, 0.04);
     const keyMat = new THREE.MeshPhongMaterial({ color: 0x1a1a1a });
 
-    // Add keys in simple grid
     for (let row = 0; row < 4; row++) {
       for (let col = 0; col < 15; col++) {
         const key = new THREE.Mesh(keyGeom, keyMat);
@@ -228,7 +304,7 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
     spacebar.castShadow = true;
     keyboard.add(spacebar);
 
-    // Simple animation
+    // Keyboard animation
     const animateKB = () => {
       const t = Date.now() * 0.002;
       const glow = (Math.sin(t) + 1) * 0.3;
@@ -241,6 +317,7 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
 
     // Mouse
     const mouseGeometry = new THREE.BoxGeometry(0.15, 0.03, 0.25);
+    const mouseMaterial = new THREE.MeshLambertMaterial({ color: 0x1a1a1a });
     const mouseMesh = new THREE.Mesh(mouseGeometry, mouseMaterial);
     mouseMesh.position.set(0.8, -0.555, 0.8);
     mouseMesh.castShadow = true;
@@ -250,8 +327,8 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
     const scrollWheelGeometry = new THREE.CylinderGeometry(0.015, 0.015, 0.02, 8);
     const scrollWheelMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
     const scrollWheelMesh = new THREE.Mesh(scrollWheelGeometry, scrollWheelMaterial);
-    scrollWheelMesh.position.set(0.8, -0.525, 0.77); // Positioned on top of mouse, slightly forward
-    scrollWheelMesh.rotation.x = Math.PI / 2; // Rotate to align with mouse orientation
+    scrollWheelMesh.position.set(0.8, -0.525, 0.77);
+    scrollWheelMesh.rotation.x = Math.PI / 2;
     scrollWheelMesh.castShadow = true;
     computerGroup.add(scrollWheelMesh);
 
@@ -263,48 +340,48 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
     powerButton.rotation.x = Math.PI / 2;
     computerGroup.add(powerButton);
 
-    // Floor (Carbon Fiber Desk)
+    // Floor
     const floorGeometry = new THREE.PlaneGeometry(15, 7);
     
-    const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 256;
-    const ctx = canvas.getContext('2d');
+    const floorCanvas = document.createElement('canvas');
+    floorCanvas.width = 256;
+    floorCanvas.height = 256;
+    const floorCtx = floorCanvas.getContext('2d');
     
-    if (ctx) {
-      ctx.fillStyle = '#0f0f0f';
-      ctx.fillRect(0, 0, 256, 256);
+    if (floorCtx) {
+      floorCtx.fillStyle = '#0f0f0f';
+      floorCtx.fillRect(0, 0, 256, 256);
       
       for (let y = 0; y < 256; y += 4) {
           for (let x = 0; x < 256; x += 4) {
               if ((Math.floor(x / 4) + Math.floor(y / 4)) % 2 === 0) {
-                  ctx.fillStyle = '#1a1a1a';
+                  floorCtx.fillStyle = '#1a1a1a';
               } else {
-                  ctx.fillStyle = '#333333';
+                  floorCtx.fillStyle = '#333333';
               }
-              ctx.fillRect(x, y, 4, 4);
+              floorCtx.fillRect(x, y, 4, 4);
           }
       }
       
-      ctx.strokeStyle = '#444444';
-      ctx.lineWidth = 1;
+      floorCtx.strokeStyle = '#444444';
+      floorCtx.lineWidth = 1;
       
       for (let i = 0; i < 256; i += 4) {
-          ctx.beginPath();
-          ctx.moveTo(0, i);
-          ctx.lineTo(256, i);
-          ctx.stroke();
+          floorCtx.beginPath();
+          floorCtx.moveTo(0, i);
+          floorCtx.lineTo(256, i);
+          floorCtx.stroke();
       }
       
       for (let i = 0; i < 256; i += 4) {
-          ctx.beginPath();
-          ctx.moveTo(i, 0);
-          ctx.lineTo(i, 256);
-          ctx.stroke();
+          floorCtx.beginPath();
+          floorCtx.moveTo(i, 0);
+          floorCtx.lineTo(i, 256);
+          floorCtx.stroke();
       }
     }
     
-    const carbonTexture = new THREE.CanvasTexture(canvas);
+    const carbonTexture = new THREE.CanvasTexture(floorCanvas);
     carbonTexture.wrapS = THREE.RepeatWrapping;
     carbonTexture.wrapT = THREE.RepeatWrapping;
     carbonTexture.repeat.set(8, 8);
@@ -348,31 +425,84 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
 
     window.addEventListener('resize', onWindowResize);
 
+    // Function to render HyperText component to overlay canvas
+    const renderHyperTextOverlay = () => {
+      if (hyperTextContainerRef.current && overlayCanvasRef.current) {
+        const ctx = overlayCanvasRef.current.getContext('2d');
+        if (ctx) {
+          // Clear the overlay canvas
+          ctx.clearRect(0, 0, 512, 384);
+          
+          try {
+            // Get the text content from the HyperTextDemo component
+            const container = hyperTextContainerRef.current;
+            const textContent = container.textContent || container.innerText || 'HyperText';
+            
+            // Apply the transform for proper orientation
+            ctx.save();
+            ctx.scale(1, -1);
+            ctx.translate(0, -384);
+            
+            // Use white color instead of computed color
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '16px monospace';
+            ctx.textBaseline = 'top';
+            
+            // Position at top-left corner (remember we're in flipped coordinates)
+            const x = 20;
+            const y = 20; // Top position in flipped coordinates
+            
+            // Split text into lines if needed
+            const lines = textContent.split('\n');
+            lines.forEach((line, index) => {
+              ctx.fillText(line.trim(), x, y + (index * 20));
+            });
+            
+            ctx.restore();
+          } catch (error) {
+            console.error('Error rendering HyperText:', error);
+            // Simple fallback
+            ctx.save();
+            ctx.scale(1, -1);
+            ctx.translate(0, -384);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '16px monospace';
+            ctx.textBaseline = 'top';
+            ctx.fillText('HyperText Demo', 20, 20);
+            ctx.restore();
+          }
+        }
+      }
+    };
+
+    // Initial HyperText render
+    setTimeout(renderHyperTextOverlay, 500);
+
     // Animation loop
     const animate = (): void => {
         animationRef.current = requestAnimationFrame(animate);
 
         const time = Date.now() * 0.001;
 
-        // Update VRM viewer canvas texture
-        if (vrmCanvasRef.current && canvasTexture) {
-          const ctx = vrmCanvas.getContext('2d');
+        // Update HyperText overlay animation
+        renderHyperTextOverlay();
+
+        // Composite VRM canvas and HyperText overlay
+        if (vrmCanvasRef.current && overlayCanvasRef.current && canvasTexture) {
+          const ctx = compositeCanvas.getContext('2d');
           if (ctx) {
-            // Clear the canvas first to prevent ghosting
+            // Clear composite canvas
             ctx.clearRect(0, 0, 512, 384);
             
-            // Save context state
+            // Draw VRM canvas (flipped vertically)
             ctx.save();
-            
-            // Flip the image vertically
             ctx.scale(1, -1);
             ctx.translate(0, -384);
-            
-            // Copy the VRM canvas content to our texture canvas
             ctx.drawImage(vrmCanvasRef.current, 0, 0, 512, 384);
-            
-            // Restore context state
             ctx.restore();
+            
+            // Draw HyperText overlay on top (already flipped in renderHyperTextOverlay)
+            ctx.drawImage(overlayCanvasRef.current, 0, 0);
             
             canvasTexture.needsUpdate = true;
           }

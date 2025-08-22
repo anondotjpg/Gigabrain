@@ -22,6 +22,7 @@ import { websocketService } from '../services/websocketService';
 import { MessageMiddleOut } from "@/features/messages/messageMiddleOut";
 import { CopyToClipboard } from "@/components/copy";
 import Computer3DWithVrm from "@/components/computer";
+import HyperTextDemo from "@/components/hyper";
 
 const inter = Inter({
   subsets: ["latin"],
