@@ -150,7 +150,7 @@ export const MessageInput = ({
             backgroundColor: 'transparent',
             border: 'none',
             color: '#E7E9EA',
-            fontSize: '16px',
+            fontSize: '14px',
             fontWeight: '400',
             outline: 'none',
             padding: '6px 0',
