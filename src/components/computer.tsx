@@ -263,10 +263,86 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
     stand.castShadow = true;
     computerGroup.add(stand);
 
+    // Mousepad with overlay system
+    const mousepadCanvas = document.createElement('canvas');
+    mousepadCanvas.width = 512;
+    mousepadCanvas.height = 256;
+    const mousepadTexture = new THREE.CanvasTexture(mousepadCanvas);
+    mousepadTexture.flipY = false;
+
+    // Create mousepad base (30% wider)
+    const mousepadGeometry = new THREE.BoxGeometry(1.95, 0.005, 0.8);
+    const mousepadBaseMaterial = new THREE.MeshPhongMaterial({ 
+      color: 0x2a2a2a,
+      shininess: 10
+    });
+    const mousepadBase = new THREE.Mesh(mousepadGeometry, mousepadBaseMaterial);
+    mousepadBase.position.set(0.1, -0.597, 0.8);
+    mousepadBase.castShadow = true;
+    mousepadBase.receiveShadow = true;
+    computerGroup.add(mousepadBase);
+
+    // Create mousepad surface with canvas texture (30% wider)
+    const mousepadSurfaceGeometry = new THREE.PlaneGeometry(1.885, 0.75);
+    const mousepadSurfaceMaterial = new THREE.MeshLambertMaterial({ 
+      map: mousepadTexture,
+      color: 0xffffff,
+      transparent: true
+    });
+    
+    const mousepadSurface = new THREE.Mesh(mousepadSurfaceGeometry, mousepadSurfaceMaterial);
+    mousepadSurface.rotation.x = -Math.PI / 2;
+    mousepadSurface.position.set(0.1, -0.594, 0.8);
+    mousepadSurface.receiveShadow = true;
+    computerGroup.add(mousepadSurface);
+
+    // Function to render mousepad with x.png overlay
+    const renderMousepadOverlay = () => {
+      const ctx = mousepadCanvas.getContext('2d');
+      if (!ctx) return;
+
+      // Clear canvas
+      ctx.clearRect(0, 0, 512, 256);
+      
+      // Fill with mousepad base color
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, 512, 256);
+      
+      // Load and draw x.png in bottom left corner
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        // Draw x.png in bottom left corner (50% smaller, flipped horizontally)
+        const xSize = 30; // Size of the x logo (50% smaller than 80)
+        // Position at bottom left: x=20 from left, y=20 from bottom
+        ctx.save();
+        ctx.scale(-1, 1); // Flip horizontally
+        ctx.drawImage(img, -(10 + xSize), 10, xSize, xSize);
+        ctx.restore();
+        mousepadTexture.needsUpdate = true;
+      };
+      img.onerror = () => {
+        // Fallback: draw a simple X shape in bottom left
+        ctx.strokeStyle = '#666666';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(20, 20);
+        ctx.lineTo(60, 60);
+        ctx.moveTo(60, 20);
+        ctx.lineTo(20, 60);
+        ctx.stroke();
+        mousepadTexture.needsUpdate = true;
+      };
+      img.src = '/xai.png';
+    };
+
+    // Initial mousepad render
+    renderMousepadOverlay();
+
     // Keyboard
     const keyboardGeometry = new THREE.BoxGeometry(1.2, 0.05, 0.4);
     const kbMaterial = new THREE.MeshPhongMaterial({ 
-      color: 0x0a0a0a,
+      color: 0x2a2a2a,
       shininess: 60
     });
 
@@ -436,7 +512,7 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
           try {
             // Get the text content from the HyperTextDemo component
             const container = hyperTextContainerRef.current;
-            const textContent = container.textContent || container.innerText || 'HyperText';
+            const textContent = container.textContent || container.innerText || '_';
             
             // Apply the transform for proper orientation
             ctx.save();
