@@ -317,7 +317,7 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
         // Position at bottom left: x=20 from left, y=20 from bottom
         ctx.save();
         ctx.scale(-1, 1); // Flip horizontally
-        ctx.drawImage(img, -(10 + xSize), 10, xSize, xSize);
+        ctx.drawImage(img, -(7 + xSize), 10, xSize, xSize);
         ctx.restore();
         mousepadTexture.needsUpdate = true;
       };
@@ -417,7 +417,7 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
     computerGroup.add(powerButton);
 
     // Floor
-    const floorGeometry = new THREE.PlaneGeometry(15, 7);
+    const floorGeometry = new THREE.PlaneGeometry(10, 5);
     
     const floorCanvas = document.createElement('canvas');
     floorCanvas.width = 256;

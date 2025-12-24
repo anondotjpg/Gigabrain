@@ -35,11 +35,11 @@ export const CopyToClipboard = ({ textToCopy }: Props) => {
   }, [textToCopy]);
 
   return (
-    <div className="absolute top-[6px] right-[6px] z-50 hidden">
+    <div className="absolute top-[6px] right-[6px] z-50">
       <div className="flex items-center gap-2">
         {/* X link moved to the left */}
         <a 
-          href="https://x.com/compainionfun" 
+          href="https://x.com/pumpsanlive" 
           target="_blank" 
           rel="noopener noreferrer"
           style={{ 
@@ -49,7 +49,7 @@ export const CopyToClipboard = ({ textToCopy }: Props) => {
         >
           <img 
             src="x.png" 
-            alt="Follow @compainionfun on Twitter" 
+            alt="Follow me onX" 
             style={{ width: '12px', height: '12px' }}
           />
         </a>

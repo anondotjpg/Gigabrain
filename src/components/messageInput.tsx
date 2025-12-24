@@ -1,5 +1,5 @@
 import React from 'react';
-import { HiMicrophone, HiPaperAirplane } from 'react-icons/hi2';
+import { HiMicrophone } from 'react-icons/hi2';
 import { RiSendPlaneFill } from "react-icons/ri";
 
 type Props = {
@@ -14,6 +14,9 @@ type Props = {
   onClickMicButton: (event: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
+const PUMP_GREEN = '#00FFA3';
+const PUMP_GREEN_DARK = '#00E693';
+
 export const MessageInput = ({
   userMessage,
   isMicRecording,
@@ -25,26 +28,25 @@ export const MessageInput = ({
 }: Props) => {
   const templateMessages = [
     "what's happening?",
-    "trending now", 
+    "trending now",
     "for you",
     "explore",
-    "spaces"
+    "spaces",
   ];
 
   const handleTemplateClick = (template: string) => {
     if (!isChatProcessing) {
-      // Create a synthetic event to match the expected onChange signature
       const syntheticEvent = {
         target: { value: template },
-        currentTarget: { value: template }
+        currentTarget: { value: template },
       } as React.ChangeEvent<HTMLInputElement>;
-      
+
       onChangeUserMessage(syntheticEvent);
     }
   };
 
   return (
-    <div 
+    <div
       style={{
         position: 'fixed',
         bottom: 0,
@@ -56,7 +58,7 @@ export const MessageInput = ({
     >
       {/* Template Messages */}
       {!userMessage && !isChatProcessing && (
-        <div 
+        <div
           style={{
             maxWidth: '600px',
             margin: '0 auto 16px auto',
@@ -64,7 +66,7 @@ export const MessageInput = ({
             gap: '12px',
             flexWrap: 'wrap',
             justifyContent: 'center',
-            opacity: 0
+            opacity: 0,
           }}
         >
           {templateMessages.map((template, index) => (
@@ -77,10 +79,10 @@ export const MessageInput = ({
                 padding: '6px 12px',
                 color: '#E7E9EA',
                 fontSize: '15px',
-                fontWeight: '400',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
-                fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
+                fontFamily:
+                  'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
               }}
             >
               {template}
@@ -90,7 +92,7 @@ export const MessageInput = ({
       )}
 
       {/* Main Input Container */}
-      <div 
+      <div
         style={{
           maxWidth: '600px',
           margin: '0 auto',
@@ -100,19 +102,18 @@ export const MessageInput = ({
           backgroundColor: '#000000',
           borderRadius: '24px',
           padding: '10px 20px',
-          position: 'relative',
         }}
       >
+        {/* Mic Button */}
         <button
           disabled={isChatProcessing}
           onClick={onClickMicButton}
           style={{
-            backgroundColor: isMicRecording ? '#1D9BF0' : 'transparent',
+            backgroundColor: isMicRecording ? PUMP_GREEN : 'transparent',
             border: 'none',
             borderRadius: '50%',
             padding: '8px',
             cursor: isChatProcessing ? 'not-allowed' : 'pointer',
-            fontSize: '16px',
             opacity: isChatProcessing ? 0.5 : 1,
             transition: 'all 0.2s ease',
             display: 'flex',
@@ -123,21 +124,26 @@ export const MessageInput = ({
           }}
           onMouseEnter={(e) => {
             if (!isChatProcessing) {
-              e.currentTarget.style.backgroundColor = isMicRecording ? '#1A8CD8' : 'rgba(29, 155, 240, 0.1)';
+              e.currentTarget.style.backgroundColor = isMicRecording
+                ? PUMP_GREEN_DARK
+                : 'rgba(0, 255, 163, 0.12)';
             }
           }}
           onMouseLeave={(e) => {
             if (!isChatProcessing) {
-              e.currentTarget.style.backgroundColor = isMicRecording ? '#1D9BF0' : 'transparent';
+              e.currentTarget.style.backgroundColor = isMicRecording
+                ? PUMP_GREEN
+                : 'transparent';
             }
           }}
         >
-          {(HiMicrophone as any)({ 
-            size: 20, 
-            color: isMicRecording ? '#FFFFFF' : '#1D9BF0' 
-          })}
+          <HiMicrophone
+            size={20}
+            color={isMicRecording ? '#000000' : PUMP_GREEN}
+          />
         </button>
 
+        {/* Input */}
         <input
           type="text"
           placeholder="What is happening?!"
@@ -151,20 +157,21 @@ export const MessageInput = ({
             border: 'none',
             color: '#E7E9EA',
             fontSize: '14px',
-            fontWeight: '400',
             outline: 'none',
             padding: '6px 0',
-            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace'
+            fontFamily:
+              'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
           }}
         />
 
+        {/* Send / Spinner */}
         {isChatProcessing ? (
-          <div 
+          <div
             style={{
               width: '20px',
               height: '20px',
               border: '2px solid #2F3336',
-              borderTop: '2px solid #1D9BF0',
+              borderTop: `2px solid ${PUMP_GREEN}`,
               borderRadius: '50%',
               animation: 'spin 1s linear infinite',
             }}
@@ -176,31 +183,28 @@ export const MessageInput = ({
             style={{
               padding: '10px',
               cursor: userMessage ? 'pointer' : 'not-allowed',
-              fontSize: '16px',
-              transition: 'all 0.2s ease',
-              color: '#FFFFFF',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               width: '40px',
-              height: '40px'
+              height: '40px',
             }}
           >
-            {(RiSendPlaneFill as any)({ 
-              size: 18, 
-              color: userMessage ? '#1D9BF0' : '#808080'
-            })}
+            <RiSendPlaneFill
+              size={18}
+              color={userMessage ? PUMP_GREEN : '#808080'}
+            />
           </button>
         )}
       </div>
-      
+
       <style>
         {`
           @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
           }
-          
+
           input::placeholder {
             color: #536471 !important;
           }
