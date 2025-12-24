@@ -15,7 +15,7 @@ export const IconButton = ({
   return (
     <button
       {...rest}
-      className={`bg-black text-white rounded-16 text-sm p-8 text-center inline-flex items-center mr-2
+      className={`bg-white text-black rounded-16 text-sm p-8 text-center inline-flex items-center mr-2
         ${rest.className}
       `}
     >

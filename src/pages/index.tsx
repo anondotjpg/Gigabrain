@@ -23,6 +23,7 @@ import { MessageMiddleOut } from "@/features/messages/messageMiddleOut";
 import { CopyToClipboard } from "@/components/copy";
 import Computer3DWithVrm from "@/components/computer";
 import HyperTextDemo from "@/components/hyper";
+import { Settings } from "@/components/settings";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -344,7 +345,7 @@ export default function Home() {
     <div className={inter.className}>
       <Meta />
       <Computer3DWithVrm selectedVrm={4} />
-      <CopyToClipboard textToCopy="1234pump" />
+      <CopyToClipboard textToCopy="Gc59Jm3Gowd7HX8uPoBcmuExw5GQCVoyMYMgPhWhpump" />
       <div className="">
         <MessageInputContainer
           isChatProcessing={chatProcessing}
