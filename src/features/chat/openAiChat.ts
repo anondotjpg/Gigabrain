@@ -66,7 +66,6 @@ export async function getChatResponseStream(
             // "model": "cohere/command-r-plus",
             // "model": "anthropic/claude-3.5-sonnet:beta",
             "model": "x-ai/grok-4",
-            "messages": messages, // Now using the messages array directly
             "temperature": 0.7,
             "max_tokens": 200,
             "stream": true,
