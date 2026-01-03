@@ -31,11 +31,11 @@ export class Viewer {
     const ambient = new THREE.AmbientLight(0xffffff, 0.45);
     this._scene.add(ambient);
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 0.85);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 0.65);
     keyLight.position.set(1.0, 1.8, 1.2);
     this._scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.35);
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.05);
     fillLight.position.set(-1.2, 1.2, 0.8);
     this._scene.add(fillLight);
 
