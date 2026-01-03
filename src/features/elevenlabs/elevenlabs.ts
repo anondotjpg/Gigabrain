@@ -3,7 +3,7 @@ import axios from "axios";
 // Sends a message to the server-side API to synthesize speech.
 export async function synthesizeVoice(message: string, selectedVrm: number) {
   try {
-    const response = await axios.post("https://don-wheat-six.vercel.app//api/synthesizeVoice", { 
+    const response = await axios.post("https://www.donthedog.com/api/synthesizeVoice", { 
       message,
       selectedVrm // Pass the selected VRM to the API
     });
@@ -18,7 +18,7 @@ export async function synthesizeVoice(message: string, selectedVrm: number) {
 // Fetches available voices from the server-side API.
 export async function getVoices() {
   try {
-    const response = await axios.get("https://don-wheat-six.vercel.app//api/getVoices");
+    const response = await axios.get("https://www.donthedog.com/api/getVoices");
     return response.data;
   } catch (error) {
     console.error("Error fetching voices:", error);
