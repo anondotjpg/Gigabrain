@@ -90,7 +90,7 @@ export async function getChatResponseStream(
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              model: "x-ai/grok-4-fast",
+              model: "x-ai/grok-4",
               messages: finalMessages,
               temperature: 0.7,
               max_tokens: 200,
