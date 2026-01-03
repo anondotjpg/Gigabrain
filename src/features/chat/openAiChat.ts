@@ -94,7 +94,7 @@ export async function getChatResponseStream(
               messages: finalMessages,
               temperature: 0.7,
               max_tokens: 200,
-              stream: true,
+              stream: false,
             }),
           }
         );
