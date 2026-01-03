@@ -408,8 +408,8 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
     // Green underglow strip
     const glowGeom = new THREE.BoxGeometry(1.15, 0.004, 0.02);
     const glowMat = new THREE.MeshPhongMaterial({ 
-      color: 0x1DA1F2,
-      emissive: 0x1DA1F2
+      color: 0xFF9A00,
+      emissive: 0xFF9A00,
     });
     const bottomGlow = new THREE.Mesh(glowGeom, glowMat);
     bottomGlow.position.set(0, 0.027, 0.19);
@@ -439,7 +439,7 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
     const animateKB = () => {
       const t = Date.now() * 0.002;
       const glow = (Math.sin(t) + 1) * 0.3;
-      bottomGlow.material.emissive.setHSL(0.33, 1, glow);
+      bottomGlow.material.emissive.setHSL(0.13, 1, glow);
       requestAnimationFrame(animateKB);
     };
     animateKB();
