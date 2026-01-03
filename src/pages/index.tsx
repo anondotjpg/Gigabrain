@@ -346,6 +346,9 @@ export default function Home() {
   return (
     <div className={inter.className}>
       <Meta />
+      <div className="">
+        
+      </div>
       <TopNews95 />
       <Computer3DWithVrm selectedVrm={4} />
       <CopyToClipboard textToCopy="xxxxxx" />
