@@ -355,7 +355,7 @@ export default function Home() {
       <div className="desktop-only-widgets">
         <TopNews95 />
         <CryptoMarquee95 />
-        <AddyModal95 addy={"updating..."} />
+        <AddyModal95 addy={"FwFatAwAmeBg6SwDDjdGLCwkowKNBEnZkoNfftzWbonk"} />
         <div className="desktop-only-widgetz">
           <Actions95 />
         </div>
