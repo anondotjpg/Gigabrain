@@ -130,7 +130,7 @@ export function CryptoMarquee95() {
           rel="noopener noreferrer"
         >
           <img
-            src="/truth.svg"
+            src="/truth.png"
             alt="Truth Social"
             style={{
               width: 18,
