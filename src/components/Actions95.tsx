@@ -1,5 +1,29 @@
 'use client';
 
+function SwapIcon95() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#2b2b2b"
+      strokeWidth="2"
+      strokeLinecap="square"
+      strokeLinejoin="miter"
+      style={{ imageRendering: 'pixelated' }}
+    >
+      {/* Top arrow */}
+      <path d="M4 7h12" />
+      <path d="M12 3l4 4-4 4" />
+
+      {/* Bottom arrow */}
+      <path d="M20 17H8" />
+      <path d="M12 21l-4-4 4-4" />
+    </svg>
+  );
+}
+
 export function Actions95() {
   return (
     <div
