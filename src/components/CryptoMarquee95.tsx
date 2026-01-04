@@ -125,12 +125,12 @@ export function CryptoMarquee95() {
         <span>Crypto</span>
 
         <a
-          href="https://truthsocial.com/@DontheDog"
+          href="https://x.com/DononBonk"
           target="_blank"
           rel="noopener noreferrer"
         >
           <img
-            src="/truth.png"
+            src="/truth.svg"
             alt="Truth Social"
             style={{
               width: 18,
