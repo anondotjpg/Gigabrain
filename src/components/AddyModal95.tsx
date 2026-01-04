@@ -100,7 +100,7 @@ export function AddyModal95({ addy }: Props) {
           </div>
 
           <div style={{ fontSize: 15, marginBottom: 14 }}>
-            The Dog is now online running things.<br />
+            The Don is now online running things.<br />
             Fast. Fair. Dog-approved.
           </div>
 
