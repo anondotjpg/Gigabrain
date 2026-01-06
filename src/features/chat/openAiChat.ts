@@ -51,8 +51,8 @@ export async function getChatResponseStream(
           throw new Error("Missing OpenRouter API key");
         }
 
-        const YOUR_SITE_URL = "https://www.donthedog.com/";
-        const YOUR_SITE_NAME = "Don the Dog";
+        const YOUR_SITE_URL = "https://igigabrain.com/";
+        const YOUR_SITE_NAME = "Gigabrain";
 
         // 🔹 Fetch live news context
         const newsContext = await getNewsContext();
@@ -90,7 +90,7 @@ export async function getChatResponseStream(
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              model: "x-ai/grok-4-fast",
+              model: "anthropic/claude-opus-4.5",
               messages: finalMessages,
               temperature: 0.7,
               max_tokens: 200,
