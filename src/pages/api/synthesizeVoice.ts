@@ -4,10 +4,10 @@ import axios, { AxiosRequestConfig, ResponseType } from "axios";
 
 // Define voice IDs for each VRM
 const VOICE_IDS = {
-  1: "MUFAVOTOPgGpKbrG8i6C", // Current voice ID for VRM 1
-  2: "MUFAVOTOPgGpKbrG8i6C",    // Replace with actual voice ID for VRM 2
-  3: "MUFAVOTOPgGpKbrG8i6C",    // Replace with actual voice ID for VRM 3
-  4: "MUFAVOTOPgGpKbrG8i6C",
+  1: "NFG5qt843uXKj4pFvR7C", // Current voice ID for VRM 1
+  2: "NFG5qt843uXKj4pFvR7C",    // Replace with actual voice ID for VRM 2
+  3: "NFG5qt843uXKj4pFvR7C",    // Replace with actual voice ID for VRM 3
+  4: "NFG5qt843uXKj4pFvR7C",
 };
 
 const API_KEY = process.env.ELEVENLABS_API_KEY;

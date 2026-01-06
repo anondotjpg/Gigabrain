@@ -192,7 +192,7 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
 
     // Load and blur background image
     const textureLoader = new THREE.TextureLoader();
-    textureLoader.load('/room.jpg', (texture) => {
+    textureLoader.load('/room.png', (texture) => {
       const blurCanvas = document.createElement('canvas');
       const blurCtx = blurCanvas.getContext('2d');
       
@@ -351,49 +351,6 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
     mousepadSurface.receiveShadow = true;
     computerGroup.add(mousepadSurface);
 
-    // Function to render mousepad with x.png overlay
-    const renderMousepadOverlay = () => {
-      const ctx = mousepadCanvas.getContext('2d');
-      if (!ctx) return;
-
-      // Clear canvas
-      ctx.clearRect(0, 0, 512, 256);
-      
-      // Fill with mousepad base color
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, 512, 256);
-      
-      // Load and draw x.png in bottom left corner
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        // Draw x.png in bottom left corner (50% smaller, flipped horizontally)
-        const xSize = 30; // Size of the x logo (50% smaller than 80)
-        // Position at bottom left: x=20 from left, y=20 from bottom
-        ctx.save();
-        ctx.scale(-1, 1); // Flip horizontally
-        ctx.drawImage(img, -(7 + xSize), 10, xSize, xSize);
-        ctx.restore();
-        mousepadTexture.needsUpdate = true;
-      };
-      img.onerror = () => {
-        // Fallback: draw a simple X shape in bottom left
-        ctx.strokeStyle = '#666666';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(20, 20);
-        ctx.lineTo(60, 60);
-        ctx.moveTo(60, 20);
-        ctx.lineTo(20, 60);
-        ctx.stroke();
-        mousepadTexture.needsUpdate = true;
-      };
-      img.src = '/xai.png';
-    };
-
-    // Initial mousepad render
-    renderMousepadOverlay();
-
     // Keyboard
     const keyboardGeometry = new THREE.BoxGeometry(1.2, 0.05, 0.4);
     const kbMaterial = new THREE.MeshPhongMaterial({ 
@@ -404,16 +361,6 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
     const keyboard = new THREE.Mesh(keyboardGeometry, kbMaterial);
     keyboard.position.set(0, -0.565, 0.8);
     keyboard.castShadow = true;
-
-    // Green underglow strip
-    const glowGeom = new THREE.BoxGeometry(1.15, 0.004, 0.02);
-    const glowMat = new THREE.MeshPhongMaterial({ 
-      color: 0xFF9A00,
-      emissive: 0xFF9A00,
-    });
-    const bottomGlow = new THREE.Mesh(glowGeom, glowMat);
-    bottomGlow.position.set(0, 0.027, 0.19);
-    keyboard.add(bottomGlow);
 
     // Keys
     const keyGeom = new THREE.BoxGeometry(0.04, 0.008, 0.04);
@@ -435,15 +382,6 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
     spacebar.castShadow = true;
     keyboard.add(spacebar);
 
-    // Keyboard animation
-    const animateKB = () => {
-      const t = Date.now() * 0.002;
-      const glow = (Math.sin(t) + 1) * 0.3;
-      bottomGlow.material.emissive.setHSL(0.13, 1, glow);
-      requestAnimationFrame(animateKB);
-    };
-    animateKB();
-
     computerGroup.add(keyboard);
 
     // Mouse
@@ -463,171 +401,100 @@ const Computer3DWithVrm: React.FC<Computer3DWithVrmProps> = ({ selectedVrm }) =>
     scrollWheelMesh.castShadow = true;
     computerGroup.add(scrollWheelMesh);
 
-    // ============================================
-    // BIG RED EASY BUTTON (Staples style)
-    // ============================================
-    const easyButtonGroup = new THREE.Group();
-    
-    // Smooth black base
-    const buttonBaseGeometry = new THREE.CylinderGeometry(0.12, 0.14, 0.04, 64);
-    const buttonBaseMaterial = new THREE.MeshPhongMaterial({ 
-      color: 0x222222,
-      shininess: 60
-    });
-    const buttonBase = new THREE.Mesh(buttonBaseGeometry, buttonBaseMaterial);
-    buttonBase.castShadow = true;
-    buttonBase.receiveShadow = true;
-    easyButtonGroup.add(buttonBase);
-
-    // Big smooth red dome button
-    const buttonDomeGeometry = new THREE.SphereGeometry(0.1, 64, 32, 0, Math.PI * 2, 0, Math.PI / 2);
-    const buttonDomeMaterial = new THREE.MeshPhongMaterial({ 
-      color: 0xdd0000,
-      shininess: 90,
-      specular: 0x666666
-    });
-    const buttonDome = new THREE.Mesh(buttonDomeGeometry, buttonDomeMaterial);
-    buttonDome.position.y = 0.02;
-    buttonDome.castShadow = true;
-    easyButtonGroup.add(buttonDome);
-
-    // Position the button on the desk
-    easyButtonGroup.position.set(-1.2, -0.58, 0.5);
-    computerGroup.add(easyButtonGroup);
-
-    // ============================================
-    // REDACTED WHITE DOCUMENTS (simple flat planes)
-    // ============================================
-    
-    // Pre-generate document textures once
-    const createDocTexture = (seed: number) => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 128;
-      canvas.height = 180;
-      const ctx = canvas.getContext('2d');
-      
-      if (ctx) {
-        // White background
-        ctx.fillStyle = '#f8f8f5';
-        ctx.fillRect(0, 0, 128, 180);
-        
-        // Header
-        ctx.fillStyle = '#333333';
-        ctx.font = 'bold 8px Arial';
-        ctx.fillText('CLASSIFIED', 38, 12);
-        
-        ctx.font = '6px Arial';
-        ctx.fillText('TOP SECRET', 45, 22);
-        
-        // Redacted lines - deterministic based on seed
-        ctx.fillStyle = '#000000';
-        const rng = (s: number) => {
-          const x = Math.sin(s) * 10000;
-          return x - Math.floor(x);
-        };
-        
-        for (let i = 0; i < 12; i++) {
-          const y = 35 + i * 11;
-          const barWidth = 70 + rng(seed + i) * 40;
-          const barStart = 10 + rng(seed + i + 100) * 8;
-          ctx.fillRect(barStart, y, barWidth, 6);
-        }
-        
-        // Footer
-        ctx.fillStyle = '#999999';
-        ctx.font = '5px Arial';
-        ctx.fillText('Page 1 of [REDACTED]', 35, 172);
-      }
-      
-      const texture = new THREE.CanvasTexture(canvas);
-      texture.minFilter = THREE.LinearFilter;
-      texture.magFilter = THREE.LinearFilter;
-      return texture;
-    };
-
-    // Create simple flat document meshes
-    const docTexture1 = createDocTexture(1);
-    const docTexture2 = createDocTexture(2);
-    const docTexture3 = createDocTexture(3);
-
-    const createDocument = (texture: THREE.Texture, x: number, z: number, rotY: number, yOffset: number) => {
-      const docGeometry = new THREE.PlaneGeometry(0.22, 0.3);
-      const docMaterial = new THREE.MeshBasicMaterial({ 
-        map: texture,
-        side: THREE.FrontSide,
-        depthWrite: true,
-        polygonOffset: true,
-        polygonOffsetFactor: -1,
-        polygonOffsetUnits: -1
-      });
-      const doc = new THREE.Mesh(docGeometry, docMaterial);
-      doc.rotation.x = -Math.PI / 2;
-      doc.rotation.z = rotY;
-      doc.position.set(x, -0.55 + yOffset, z);
-      doc.renderOrder = 10 + yOffset * 1000;
-      return doc;
-    };
-
-    const doc1 = createDocument(docTexture1, 1.3, 0.35, 0.1, 0);
-    computerGroup.add(doc1);
-
-    const doc2 = createDocument(docTexture2, 1.45, 0.55, -0.2, 0.01);
-    computerGroup.add(doc2);
-
-    const doc3 = createDocument(docTexture3, 1.25, 0.6, 0.35, 0.02);
-    computerGroup.add(doc3);
-
-    // Desk Surface (formerly Floor)
+    // Professional Lab Bench Surface (Phenolic Resin/Epoxy)
     const floorGeometry = new THREE.PlaneGeometry(10, 5);
-        
+            
     const floorCanvas = document.createElement('canvas');
-    floorCanvas.width = 512; // Increased resolution for wood grain detail
-    floorCanvas.height = 512;
+    floorCanvas.width = 1024; // Higher resolution for detail
+    floorCanvas.height = 1024;
     const floorCtx = floorCanvas.getContext('2d');
 
     if (floorCtx) {
-      // 1. Base Mahogany Color
-      floorCtx.fillStyle = '#4a1a08'; 
-      floorCtx.fillRect(0, 0, 512, 512);
+      // Base color - matte black phenolic resin
+      floorCtx.fillStyle = '#1a1a1a'; 
+      floorCtx.fillRect(0, 0, 1024, 1024);
       
-      // 2. Create organic wood grain lines
-      for (let i = 0; i < 150; i++) {
-        floorCtx.strokeStyle = `rgba(35, 12, 4, ${Math.random() * 0.4})`;
-        floorCtx.lineWidth = Math.random() * 4 + 1;
+      // Add subtle mottled texture (like real lab bench material)
+      for (let i = 0; i < 3000; i++) {
+        const x = Math.random() * 1024;
+        const y = Math.random() * 1024;
+        const size = Math.random() * 3;
+        const opacity = Math.random() * 0.08;
+        floorCtx.fillStyle = `rgba(40, 40, 40, ${opacity})`;
+        floorCtx.fillRect(x, y, size, size);
+      }
+      
+      // Add very fine surface scratches and wear marks
+      for (let i = 0; i < 80; i++) {
+        const startX = Math.random() * 1024;
+        const startY = Math.random() * 1024;
+        const length = Math.random() * 200 + 50;
+        const angle = Math.random() * Math.PI * 2;
+        
+        floorCtx.strokeStyle = `rgba(60, 60, 60, ${Math.random() * 0.15})`;
+        floorCtx.lineWidth = Math.random() * 1.5;
         floorCtx.beginPath();
-        
-        let x = Math.random() * 512;
-        floorCtx.moveTo(x, 0);
-        
-        // Use bezier curves for natural wood waviness
-        floorCtx.bezierCurveTo(
-          x + (Math.random() - 0.5) * 100, 170, 
-          x + (Math.random() - 0.5) * 100, 340, 
-          x, 512
+        floorCtx.moveTo(startX, startY);
+        floorCtx.lineTo(
+          startX + Math.cos(angle) * length,
+          startY + Math.sin(angle) * length
         );
         floorCtx.stroke();
       }
       
-      // 3. Add a "Polished" sheen gradient
-      const gradient = floorCtx.createLinearGradient(0, 0, 512, 512);
-      gradient.addColorStop(0, 'rgba(255, 255, 255, 0.05)');
-      gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0)');
-      gradient.addColorStop(1, 'rgba(255, 255, 255, 0.05)');
-      floorCtx.fillStyle = gradient;
-      floorCtx.fillRect(0, 0, 512, 512);
+      // Add chemical stains (circular patches of discoloration)
+      for (let i = 0; i < 15; i++) {
+        const x = Math.random() * 1024;
+        const y = Math.random() * 1024;
+        const radius = Math.random() * 40 + 20;
+        const gradient = floorCtx.createRadialGradient(x, y, 0, x, y, radius);
+        
+        // Random stain colors (slight yellowing, browning)
+        const stainColors = [
+          'rgba(80, 70, 50, 0.08)',
+          'rgba(90, 85, 70, 0.06)',
+          'rgba(60, 55, 45, 0.07)',
+          'rgba(70, 75, 70, 0.05)'
+        ];
+        const color = stainColors[Math.floor(Math.random() * stainColors.length)];
+        
+        gradient.addColorStop(0, color);
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        floorCtx.fillStyle = gradient;
+        floorCtx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+      }
+      
+      // Add subtle edge wear (lighter areas from use)
+      const wearGradient = floorCtx.createLinearGradient(0, 0, 1024, 0);
+      wearGradient.addColorStop(0, 'rgba(50, 50, 50, 0.05)');
+      wearGradient.addColorStop(0.3, 'rgba(0, 0, 0, 0)');
+      wearGradient.addColorStop(0.7, 'rgba(0, 0, 0, 0)');
+      wearGradient.addColorStop(1, 'rgba(50, 50, 50, 0.05)');
+      floorCtx.fillStyle = wearGradient;
+      floorCtx.fillRect(0, 0, 1024, 1024);
+      
+      // Very subtle sheen variation (matte finish with slight variation)
+      const sheenNoise = floorCtx.createLinearGradient(0, 0, 1024, 1024);
+      sheenNoise.addColorStop(0, 'rgba(255, 255, 255, 0.01)');
+      sheenNoise.addColorStop(0.5, 'rgba(0, 0, 0, 0.01)');
+      sheenNoise.addColorStop(1, 'rgba(255, 255, 255, 0.01)');
+      floorCtx.fillStyle = sheenNoise;
+      floorCtx.fillRect(0, 0, 1024, 1024);
     }
 
-    const woodTexture = new THREE.CanvasTexture(floorCanvas);
-    woodTexture.wrapS = THREE.RepeatWrapping;
-    woodTexture.wrapT = THREE.RepeatWrapping;
-    // Lower repeat count makes the grain look larger and more like a furniture slab
-    woodTexture.repeat.set(2, 1);
+    const labBenchTexture = new THREE.CanvasTexture(floorCanvas);
+    labBenchTexture.wrapS = THREE.RepeatWrapping;
+    labBenchTexture.wrapT = THREE.RepeatWrapping;
+    labBenchTexture.repeat.set(2, 2);
 
     const floorMaterial = new THREE.MeshStandardMaterial({ 
-        map: woodTexture,
-        roughness: 0.15, // Low roughness for a high-end polished look
-        metalness: 0.05,
-        color: 0xffffff
+        map: labBenchTexture,
+        roughness: 0.85,      // High roughness for matte lab surface
+        metalness: 0.0,       // No metalness - it's resin/composite
+        color: 0xffffff,
+        
+        // Optional: Add normal map for more depth (uncomment if needed)
+        // normalScale: new THREE.Vector2(0.3, 0.3)
     });
 
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);

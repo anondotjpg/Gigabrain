@@ -3,5 +3,5 @@ export type ElevenLabsParam = {
 };
 
 export const DEFAULT_ELEVEN_LABS_PARAM: ElevenLabsParam = {
-    voiceId: "MUFAVOTOPgGpKbrG8i6C",
+    voiceId: "NFG5qt843uXKj4pFvR7C",
 } as const;

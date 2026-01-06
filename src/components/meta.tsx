@@ -2,9 +2,9 @@ import { buildUrl } from "@/utils/buildUrl";
 import Head from "next/head";
 
 export const Meta = () => {
-  const title = "Don";
+  const title = "Gigabrain";
   const description =
-    "Don. The Dog. Running things.";
+    "Gigabrain";
   const imageUrl = "/pump.png";
   const faviconUrl = "/pump.ico";  // Replace with your favicon path if different
 

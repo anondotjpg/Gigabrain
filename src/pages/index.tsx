@@ -24,10 +24,6 @@ import { CopyToClipboard } from "@/components/copy";
 import Computer3DWithVrm from "@/components/computer";
 import HyperTextDemo from "@/components/hyper";
 import { Settings } from "@/components/settings";
-import { TopNews95 } from "@/components/TopNews95";
-import { CryptoMarquee95 } from "@/components/CryptoMarquee95";
-import { Actions95 } from "@/components/Actions95";
-import { AddyModal95 } from "@/components/AddyModal95";
 
 
 const inter = Inter({
@@ -353,12 +349,6 @@ export default function Home() {
         
       </div>
       <div className="desktop-only-widgets">
-        <TopNews95 />
-        <CryptoMarquee95 />
-        <AddyModal95 addy={"FwFatAwAmeBg6SwDDjdGLCwkowKNBEnZkoNfftzWbonk"} />
-        <div className="desktop-only-widgetz">
-          <Actions95 />
-        </div>
       </div>
       <Computer3DWithVrm selectedVrm={4} />
       <div className="">
