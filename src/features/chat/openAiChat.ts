@@ -34,7 +34,64 @@ async function getNewsContext(): Promise<string | null> {
 }
 
 /**
- * Streaming chat completion with injected live news context
+ * Fetch current cryptocurrency prices from CoinGecko API
+ * Returns top cryptocurrencies with USD prices
+ */
+async function getCryptoContext(): Promise<string | null> {
+  try {
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,ripple,cardano,solana,polkadot,dogecoin&vs_currencies=usd&include_24hr_change=true",
+      {
+        headers: {
+          "Accept": "application/json",
+        },
+      }
+    );
+
+    if (!res.ok) return null;
+
+    const data = await res.json();
+
+    const cryptoList = [
+      { id: "bitcoin", name: "Bitcoin (BTC)" },
+      { id: "ethereum", name: "Ethereum (ETH)" },
+      { id: "binancecoin", name: "BNB" },
+      { id: "ripple", name: "XRP" },
+      { id: "cardano", name: "Cardano (ADA)" },
+      { id: "solana", name: "Solana (SOL)" },
+      { id: "polkadot", name: "Polkadot (DOT)" },
+      { id: "dogecoin", name: "Dogecoin (DOGE)" },
+    ];
+
+    const prices = cryptoList
+      .map((crypto) => {
+        const priceData = data[crypto.id];
+        if (!priceData) return null;
+
+        const price = priceData.usd.toLocaleString("en-US", {
+          style: "currency",
+          currency: "USD",
+        });
+        const change = priceData.usd_24h_change?.toFixed(2);
+        const changeStr = change
+          ? ` (${change > 0 ? "+" : ""}${change}% 24h)`
+          : "";
+
+        return `${crypto.name}: ${price}${changeStr}`;
+      })
+      .filter(Boolean);
+
+    if (prices.length === 0) return null;
+
+    return ["Current cryptocurrency prices:", ...prices].join("\n");
+  } catch (err) {
+    console.warn("Failed to load crypto context", err);
+    return null;
+  }
+}
+
+/**
+ * Streaming chat completion with injected live news and crypto context
  */
 export async function getChatResponseStream(
   messages: Message[],
@@ -54,8 +111,11 @@ export async function getChatResponseStream(
         const YOUR_SITE_URL = "https://igigabrain.com/";
         const YOUR_SITE_NAME = "Gigabrain";
 
-        // 🔹 Fetch live news context
-        const newsContext = await getNewsContext();
+        // 🔹 Fetch live contexts in parallel
+        const [newsContext, cryptoContext] = await Promise.all([
+          getNewsContext(),
+          getCryptoContext(),
+        ]);
 
         // 🔹 Build final messages with injected context
         const finalMessages: Message[] = [];
@@ -66,13 +126,23 @@ export async function getChatResponseStream(
           messages = messages.slice(1);
         }
 
-        // Inject news context as transient system message
+        // Inject combined context as transient system message
+        const contextParts: string[] = [];
+        
         if (newsContext) {
+          contextParts.push(newsContext);
+        }
+        
+        if (cryptoContext) {
+          contextParts.push(cryptoContext);
+        }
+
+        if (contextParts.length > 0) {
           finalMessages.push({
             role: "system",
             content:
-              "You may use the following current world news as factual context if relevant:\n\n" +
-              newsContext,
+              "You may use the following current information as factual context if relevant:\n\n" +
+              contextParts.join("\n\n"),
           });
         }
 
