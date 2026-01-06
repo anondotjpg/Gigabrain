@@ -17,7 +17,7 @@ type Props = {
 };
 
 /** 🟠 Accent */
-const BONK_ORANGE = '#FF9A00';
+const BONK_ORANGE = '#262626';
 
 export const MessageInput = ({
   userMessage,
