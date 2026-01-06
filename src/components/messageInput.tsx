@@ -33,7 +33,7 @@ export const MessageInput = ({
     'trending now',
     'who are you?',
     'explore',
-    "what's up?",
+    "crypto thoughts?",
   ];
 
   const handleTemplateClick = (template: string) => {
