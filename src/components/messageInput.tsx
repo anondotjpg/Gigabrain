@@ -16,8 +16,7 @@ type Props = {
   onClickMicButton: (event: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
-/** 🟠 Accent */
-const BONK_ORANGE = '#262626';
+const GIGA = '#262626';
 
 export const MessageInput = ({
   userMessage,
@@ -160,7 +159,7 @@ export const MessageInput = ({
           border-left: 2px solid #404040;
           border-right: 2px solid #fff;
           border-bottom: 2px solid #fff;
-          background: ${BONK_ORANGE};
+          background: ${GIGA};
         }
 
         .win95-btn:disabled {
@@ -191,7 +190,7 @@ export const MessageInput = ({
           width: 16px;
           height: 16px;
           border: 2px solid #808080;
-          border-top: 2px solid ${BONK_ORANGE};
+          border-top: 2px solid ${GIGA};
           border-radius: 50%;
           animation: spin 1s linear infinite;
         }
